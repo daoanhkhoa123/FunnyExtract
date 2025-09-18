@@ -17,5 +17,10 @@ class Preprop:
         v1 =  self.encoder.encode(t1, batch_size=batch_size, convert_to_numpy=True, show_progress_bar=verbose)
         v2 =  self.encoder.encode(t2, batch_size=batch_size, convert_to_numpy=True, show_progress_bar=verbose)
         return self.aggfn(v1,v2)
-        
+    
+    def call_df(self, df, batch_size, verbose =True):
+        t1, t2 = self.prepropfn(df)
+        v1 =  self.encoder.encode(t1, batch_size=batch_size, convert_to_numpy=True, show_progress_bar=verbose)
+        v2 =  self.encoder.encode(t2, batch_size=batch_size, convert_to_numpy=True, show_progress_bar=verbose)
+        return self.aggfn(v1,v2)
     
