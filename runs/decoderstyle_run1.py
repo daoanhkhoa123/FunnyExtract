@@ -24,20 +24,36 @@ class TrainParams:
     log_every_nsteps:int
     save_every_nsteps:int
     save_dir:str = "checkpoints"
+    checkpoint:str|None = None
 
 def train(model_args:DecodeStyleParams, train_args:TrainParams):
+    preprop_fn = getattr(diff_words, train_args.preprop_fn)
+    dataset = VillahuDecoderStyle(train_args.df_path, preprop=preprop_fn)
+    dataloader = DataLoader(dataset, batch_size=train_args.batch_size, shuffle=True, collate_fn=collate_fn)
+
+
     model = DecoderStyle(model_args).to(train_args.device)
     num_params = sum(p.numel() for p in model.parameters())
     num_trainable = sum(p.numel() for p in model.parameters() if p.requires_grad)
     logging.info(f"Total parameters: {num_params:,}")
     logging.info(f"Trainable parameters: {num_trainable:,}")
 
-    preprop_fn = getattr(diff_words, train_args.preprop_fn)
-    dataset = VillahuDecoderStyle(train_args.df_path, preprop=preprop_fn)
-    dataloader = DataLoader(dataset, batch_size=train_args.batch_size, shuffle=True, collate_fn=collate_fn)
 
     optimizer = torch.optim.Adam(model.parameters(), lr=train_args.lr)
     criteria = torch.nn.CrossEntropyLoss().to(train_args.device)
+
+    if train_args.checkpoint and os.path.isfile(train_args.checkpoint):
+        ckpt = torch.load(train_args.checkpoint, map_location=train_args.device)
+        model.load_state_dict(ckpt["model_state"])
+        optimizer.load_state_dict(ckpt["optimizer_state"])
+        if ckpt.get("scheduler_state") and ckpt["scheduler_state"] is not None:
+            # if you later add LR scheduler
+            pass
+        start_epoch = ckpt["epoch"] + 1
+        logging.info(f"Resumed from checkpoint {train_args.checkpoint} at epoch {start_epoch}")
+    else:
+        logging.info("Training from scratch")
+
 
     bidx = 0
     loss=torch.zeros([])
@@ -104,7 +120,9 @@ def setup():
     parser.add_argument("--device", type=str, default="cuda")
     parser.add_argument("--log_every_nsteps", type=int, default=10)
     parser.add_argument("--save_every_nsteps", type=int, default=100)
-    
+    parser.add_argument("--checkpoint", type=str, default=None,
+                    help="Path to checkpoint to resume training from")
+
     return parser
 
 
@@ -128,6 +146,7 @@ def get_config(parser:argparse.ArgumentParser):
         device=args.device,
         log_every_nsteps=args.log_every_nsteps,
         save_every_nsteps=args.save_every_nsteps,
+        checkpoint=args.checkpoint
     )
 
     return model_args, train_args
