@@ -39,8 +39,10 @@ def train(model_args:DecodeStyleParams, train_args:TrainParams):
     optimizer = torch.optim.Adam(model.parameters(), lr=train_args.lr)
     criteria = torch.nn.CrossEntropyLoss().to(train_args.device)
 
+    bidx = 0
+    loss=torch.zeros([])
     for epoch in range(train_args.epochs):
-        for bidx, batch in tqdm(enumerate(dataloader), total=len(dataloader)):
+        for bidx, batch in tqdm(enumerate(dataloader), total=len(dataloader), desc=f"Epoch {epoch} Step {bidx}, Current Loss: {loss.item()}"):
             model.zero_grad()
 
             texts, label = batch
