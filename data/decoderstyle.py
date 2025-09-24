@@ -10,11 +10,16 @@ class VillahuDecoderStyle(Dataset):
         self.df = pd.read_csv(df_path)
         self.preprop = preprop
 
+    def __len__(self):
+        return len(self.df)
+
     def __getitem__(self, index) -> Tuple[Tuple[str, str], int]:
         context = str(self.df.at[index, "context"])
         response = str(self.df.at[index, "response"])
         return self.preprop(context, response), int(self.df.iloc[index]["label"])
     
+
+
 def collate_fn(batch):
     pair, label = zip(*batch)
     contexts, responses = zip(*pair)
