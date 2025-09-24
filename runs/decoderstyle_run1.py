@@ -44,10 +44,6 @@ def train(model_args:DecodeStyleParams, train_args:TrainParams):
             model.zero_grad()
 
             texts, label = batch
-            print(texts)
-            print("--------------")
-            print(label)
-            print("--------------")
             label = label.to(train_args.device)
             logits = model(texts)
             loss = criteria(logits, label)
