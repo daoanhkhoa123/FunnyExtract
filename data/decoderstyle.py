@@ -16,14 +16,16 @@ class VillahuDecoderStyle(Dataset):
     def __getitem__(self, index) -> Tuple[Tuple[str, str], torch.Tensor]:
         context = str(self.df.at[index, "context"])
         response = str(self.df.at[index, "response"])
-        return self.preprop(context, response), torch.tensor(self.df.iloc[index]["label"])
+        label = torch.tensor(self.df.iloc[index]["label"], dtype= torch.long)
+        return self.preprop(context, response), label
     
 
 
 def collate_fn(batch):
-    pair, label = zip(*batch)
+    pair, labels = zip(*batch)
     contexts, responses = zip(*pair)
-
-    return list(contexts) + list(responses), label
+    labels = torch.stack(labels)
+    
+    return list(contexts) + list(responses), labels
 
 
