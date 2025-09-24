@@ -13,10 +13,10 @@ class VillahuDecoderStyle(Dataset):
     def __len__(self):
         return len(self.df)
 
-    def __getitem__(self, index) -> Tuple[Tuple[str, str], int]:
+    def __getitem__(self, index) -> Tuple[Tuple[str, str], torch.Tensor]:
         context = str(self.df.at[index, "context"])
         response = str(self.df.at[index, "response"])
-        return self.preprop(context, response), int(self.df.iloc[index]["label"])
+        return self.preprop(context, response), torch.tensor(self.df.iloc[index]["label"])
     
 
 

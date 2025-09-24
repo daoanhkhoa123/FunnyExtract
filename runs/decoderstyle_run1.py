@@ -27,6 +27,10 @@ class TrainParams:
 
 def train(model_args:DecodeStyleParams, train_args:TrainParams):
     model = DecoderStyle(model_args).to(train_args.device)
+    num_params = sum(p.numel() for p in model.parameters())
+    num_trainable = sum(p.numel() for p in model.parameters() if p.requires_grad)
+    logging.info(f"Total parameters: {num_params:,}")
+    logging.info(f"Trainable parameters: {num_trainable:,}")
 
     preprop_fn = getattr(diff_words, train_args.preprop_fn)
     dataset = VillahuDecoderStyle(train_args.df_path, preprop=preprop_fn)
