@@ -1,10 +1,10 @@
 import pandas as pd
 import numpy as np
-from diff_words import remove_common_words
+from diff_words import remove_common_words_with_counting
 
 def preppropfn(df):
   df[["context_clean", "response_clean"]] = df.apply(
-    lambda row: pd.Series(remove_common_words(row["context"], row["response"])),
+    lambda row: pd.Series(remove_common_words_with_counting(row["context"], row["response"])),
     axis=1
     )
   
