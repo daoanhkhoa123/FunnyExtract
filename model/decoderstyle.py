@@ -33,9 +33,12 @@ class HuggingFaceEncoder_notrain:
         return torch.sum(input * attn_mask, 1)/torch.clamp(torch.sum(attn_mask,1), min=1e-9)
 
     def __call__(self, batch_str:List[str], pooling:POOLING_TYPE="token") -> Tensor:
-        print(len(batch_str), max([len(x) for x in batch_str]))
         tokens =self.tokenizer(batch_str, padding=True, truncation=True,
                                max_length=self.model.config.max_position_embeddings, return_tensors='pt')
+       
+        print("max token id:", tokens["input_ids"].max().item())
+        print("vocab size:", self.model.config.vocab_size)
+
         tokens = {k:v.to(self.device) for k, v in tokens.items()}
         with torch.no_grad():
             embeddings = self.model(**tokens)
