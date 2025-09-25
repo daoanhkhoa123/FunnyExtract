@@ -73,7 +73,7 @@ def train(model_args:DecodeStyleParams, train_args:TrainParams):
                 logging.info(f"Epoch {epoch}, Step {bidx}, Loss {loss.item():.4f}")
             if bidx % train_args.save_every_nsteps == 0:
                 save_checkpoint(epoch, model, optimizer, None, loss, train_args)
-
+    save_checkpoint(train_args.epochs, model, optimizer, None, loss, train_args)
 
 def save_checkpoint(epoch, model, optimizer, scheduler, loss, config):
     os.makedirs(config.save_dir, exist_ok=True)
